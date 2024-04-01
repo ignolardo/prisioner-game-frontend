@@ -1,5 +1,6 @@
 "use client"
 
+import "@/customBlocks/customBlocks"
 import React, { useState } from "react";
 import { BlocklyWorkspace, useBlocklyWorkspace } from "react-blockly";
 import Blockly, { JavaScript } from "blockly";
@@ -7,13 +8,15 @@ import { javascriptGenerator } from "blockly/javascript";
 import Axios from "axios";
 
 async function SendXML(xml: string) {
-  const response = await Axios.get(`http://localhost:8000/xml?xml=${xml}`)
+  const response = await Axios.post(`http://localhost:8000/xml`, {
+    xml: xml
+  })
   console.log(response.data)
 }
 
 function Home() {
   const [xml, setXml] = useState("");
-  const [javascriptCode, setJavascriptCode] = useState("");
+  //const [javascriptCode, setJavascriptCode] = useState("");
 
   const initialXml = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
 
@@ -48,6 +51,10 @@ function Home() {
             kind: "block",
             type: "math_number",
           },
+          {
+            kind: "block",
+            type: "operations",
+          },
         ],
       },
       {
@@ -57,22 +64,38 @@ function Home() {
         contents: [
           {
             kind: "block",
-            type: "new_boundary_function",
+            type: "round",
           },
           {
             kind: "block",
-            type: "return",
+            type: "betray",
+          },
+          {
+            kind: "block",
+            type: "rely",
+          },
+          {
+            kind: "block",
+            type: "plmoves",
+          },
+          {
+            kind: "block",
+            type: "opmoves",
+          },
+          {
+            kind: "block",
+            type: "return_move",
           },
         ],
       },
     ],
   };
 
-  function workspaceDidChange(workspace: any) {
+  /* function workspaceDidChange(workspace: any) {
     //const code = Blockly.JavaScript.workspaceToCode(workspace);
     const code = javascriptGenerator.workspaceToCode(workspace)
     setJavascriptCode(code);
-  }
+  } */
 
   return (
     <>
@@ -88,7 +111,6 @@ function Home() {
             snap: true,
           },
         }}
-        onWorkspaceChange={workspaceDidChange}
         onXmlChange={setXml}
       />
       <pre id="generated-xml">{xml}</pre>
