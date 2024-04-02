@@ -8,7 +8,8 @@ import { javascriptGenerator } from "blockly/javascript";
 import Axios from "axios";
 
 async function SendXML(xml: string) {
-  const response = await Axios.post(`http://localhost:8000/xml`, {
+  const response = await Axios.post(`http://localhost:8000/round`, {
+    size: 10,
     xml: xml
   })
   console.log(response.data)
