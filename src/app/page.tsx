@@ -1,22 +1,62 @@
 "use client"
 
 import "@/customBlocks/customBlocks"
-import React, { useState } from "react";
+import React, { useState, CSSProperties, useEffect } from "react";
 import { BlocklyWorkspace, useBlocklyWorkspace } from "react-blockly";
 import Blockly, { JavaScript } from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import Axios from "axios";
+import { colour } from "blockly/blocks";
 
-async function SendXML(xml: string) {
-  const response = await Axios.post(`http://localhost:8000/round`, {
-    size: 10,
+function GetApi(): string {
+  // Make an API call to VisitorAPI
+  fetch('https://api.visitorapi.com/ip')
+    .then(response => response.json())
+    .then(data => {
+      const userIP = data.ip;
+      return userIP
+    })
+    .catch(error => console.error('Error fetching IP:', error));
+  return "localhost"
+}
+
+async function GetRound(xml: string, rounds: number) {
+
+  const response = await Axios.post(`http://${GetApi()}:8000/round`, {
+    size: rounds,
     xml: xml
   })
-  console.log(response.data)
+  return response.data
+}
+
+class RoundResponse {
+  constructor() {
+    this.Moves = { 0: [], 1: [] };
+    this.Scores = { 0: [], 1: [] };
+  }
+
+  Moves: { 0: number[], 1: number[] };
+  Scores: { 0: number[], 1: number[] };
+}
+
+function MoveSymbol(props: { move: number }): React.JSX.Element {
+  switch (props.move) {
+    case 0:
+      return <span style={{ color: "#f00" }}>☒</span>
+    default:
+      return <span style={{ color: "#0f0" }}>🗹</span>
+  }
 }
 
 function Home() {
   const [xml, setXml] = useState("");
+  const [data, setData] = useState(new RoundResponse());
+  const [dataRounds, setDataRounds] = useState(1);
+  const [rounds, setRounds] = useState(10);
+
+  useEffect(() => {
+    setDataRounds(data.Moves[0].length)
+  }, [data])
   //const [javascriptCode, setJavascriptCode] = useState("");
 
   const initialXml = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
@@ -44,10 +84,6 @@ function Home() {
         name: "Math",
         colour: "#5CA65C",
         contents: [
-          {
-            kind: "block",
-            type: "math_round",
-          },
           {
             kind: "block",
             type: "math_number",
@@ -92,30 +128,62 @@ function Home() {
     ],
   };
 
-  /* function workspaceDidChange(workspace: any) {
-    //const code = Blockly.JavaScript.workspaceToCode(workspace);
-    const code = javascriptGenerator.workspaceToCode(workspace)
-    setJavascriptCode(code);
-  } */
-
   return (
     <>
-      <BlocklyWorkspace
-        toolboxConfiguration={toolboxCategories}
-        initialXml={initialXml}
-        className="fill-height"
-        workspaceConfiguration={{
-          grid: {
-            spacing: 20,
-            length: 3,
-            colour: "#ccc",
-            snap: true,
-          },
-        }}
-        onXmlChange={setXml}
-      />
-      <pre id="generated-xml">{xml}</pre>
-      <button className="sendButton bg-sky-500 text-white font-bold" id="sendButton" onClick={async () => { await SendXML(xml) }}>Send</button>
+      <div className="page">
+        <BlocklyWorkspace
+          toolboxConfiguration={toolboxCategories}
+          initialXml={initialXml}
+          className="workspace"
+          workspaceConfiguration={{
+            grid: {
+              spacing: 20,
+              length: 3,
+              colour: "#ccc",
+              snap: true,
+            },
+            move: {
+              drag: true,
+              scrollbars: false,
+            },
+            horizontalLayout: true,
+            css: true
+          }}
+          onXmlChange={setXml}
+        />
+        <table className="resultsBox">
+          <tr className="settings">
+            <td id="playButtonTd">
+              <button className="sendButton bg-sky-500 text-white font-bold" id="sendButton" onClick={async () => {
+                setData(await GetRound(xml, rounds))
+              }}>PLAY</button>
+            </td>
+            <td>
+              <input type="number" id="rounds_number" placeholder="ROUNDS" onInput={
+                (e) => {
+                  let value = (document.getElementById("rounds_number") as HTMLInputElement).value
+                  setRounds(parseInt(value))
+                }
+              } />
+            </td>
+          </tr>
+          <tr className="gameResults" style={{ fontSize: `${Math.min(22 / Math.max(dataRounds, 6), 4)}rem` }} suppressHydrationWarning>
+            <td suppressHydrationWarning>
+              {
+                data.Moves[0].map((move, i) => [move, data.Moves[1][i]]).map((e, i) =>
+                  <p key={i}>
+                    <span>{data.Scores[0][i]} &nbsp;</span>
+                    <MoveSymbol move={e[0]} />
+                    <span>&nbsp;&nbsp;&nbsp;</span>
+                    <MoveSymbol move={e[1]} />
+                    <span>&nbsp; {data.Scores[1][i]}</span>
+                  </p>
+                )
+              }
+            </td>
+          </tr>
+        </table>
+      </div>
     </>
   );
 }

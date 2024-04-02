@@ -16,10 +16,72 @@ code {
     monospace;
 }
 
+.page {
+  display: flex;
+  width: 100dvw;
+  height: 100dvh;
+}
+
+.resultsBox {
+  display: table;
+  justify-content: center;
+  width: 50%;
+  height: 100%;
+  margin: 0 auto;
+  background: #000;
+}
+
+.gameResults {
+  font-family: Consolas, monospace;
+  background: rgb(72, 76, 86);
+  height: 100%;
+  margin: auto;
+  display: table-row;
+  padding: 2rem;
+  text-align: center;
+  vertical-align: middle;
+  color: #fff;
+  position: relative;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.gameResults td {
+  padding: 5%;
+}
+
+.workspace {
+  display: table;
+  width: 50%;
+  height: 100%;
+  margin: 0 auto;
+}
+
+.settings {
+  display: inline-flex;
+  width: 100%;
+}
+
+.settings td {
+  width: 50%;
+}
+
+.settings td input {
+  width: 100%;
+  height: 100%;
+  padding: 5%;
+  font-size: 200%;
+  text-align: center;
+}
+
 .fill-height {
   height: calc(100vh - 114px);
 }
 
 .sendButton {
+  height: 100%;
+  width: 100%;
   padding: 30px;
+  font-size: 200%;
+  margin: 0;
 }
