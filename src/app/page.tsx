@@ -8,21 +8,9 @@ import { javascriptGenerator } from "blockly/javascript";
 import Axios from "axios";
 import { colour } from "blockly/blocks";
 
-function GetApi(): string {
-  // Make an API call to VisitorAPI
-  fetch('https://api.visitorapi.com/ip')
-    .then(response => response.json())
-    .then(data => {
-      const userIP = data.ip;
-      return userIP
-    })
-    .catch(error => console.error('Error fetching IP:', error));
-  return "localhost"
-}
-
 async function GetRound(xml: string, rounds: number) {
 
-  const response = await Axios.post(`http://${GetApi()}:8000/round`, {
+  const response = await Axios.post(`http://localhost:8000/play`, {
     size: rounds,
     xml: xml
   })
